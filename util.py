@@ -23,14 +23,17 @@ class PressureHistory:
 			return [int(xx*255) for xx in x]
 		return [to255Range(c) for c in rgbList]
 
+pressureMin = 1020
+pressureMax = 1030
+
 
 def pressureToHue(pressure):
-	pressureMin = 1026
-	pressureMax = 1030
 
 	if pressure==None:
 		return None
-	return min(0.75,max(0,0.75*(pressure - pressureMin)/(pressureMax-pressureMin)))
+	else:
+		normalizedPressure = (pressure - pressureMin)/(pressureMax-pressureMin)
+		return min(0.75,max(0,0.75*(1-normalizedPressure)))
 
 def listAverage(l):
 	x=reduce(lambda x, y: x+y, l)/float(len(l))

@@ -22,43 +22,39 @@ class TestHest(unittest.TestCase):
         self.assertEqual(util.pressureToHue(None),None)
 
 class TestPressureHistory(unittest.TestCase):
+    def setUp(self):
+        self.pressureHistory = util.PressureHistory()
 
     def test_addDoesnModifyLength(self):
-        pressureHistory = util.PressureHistory()
-        pressureHistory.add(1)
-        self.assertEqual(len(pressureHistory.history), util.PressureHistory.MAXLEN)
+        self.pressureHistory.add(1)
+        self.assertEqual(len(self.pressureHistory.history), util.PressureHistory.MAXLEN)
 
     def test_addValueIsTheLatestValue(self):
-        pressureHistory = util.PressureHistory()
         newPressure = 7
-        pressureHistory.add(newPressure)
-        self.assertEqual(pressureHistory.history[0], newPressure)
+        self.pressureHistory.add(newPressure)
+        self.assertEqual(self.pressureHistory.history[0], newPressure)
 
     def test_fillingHistoryHasFirstValueNextToBeForgotten(self):
-        pressureHistory = util.PressureHistory()
         for n in range(1,util.PressureHistory.MAXLEN+1):
-            pressureHistory.add(n)
-        self.assertEqual(pressureHistory.history[util.PressureHistory.MAXLEN-1],1)
+            self.pressureHistory.add(n)
+        self.assertEqual(self.pressureHistory.history[util.PressureHistory.MAXLEN-1],1)
 
     def test_asHatList(self):
-        pressureHistory = util.PressureHistory()
         newPressure = 3
-        pressureHistory.add(newPressure)
-        self.assertEqual(pressureHistory.asHatList()[1], newPressure)
-        self.assertEqual(pressureHistory.asHatList()[0], None)
+        self.pressureHistory.add(newPressure)
+        self.assertEqual(self.pressureHistory.asHatList()[1], newPressure)
+        self.assertEqual(self.pressureHistory.asHatList()[0], None)
 
     def test_pressureHistoryAsHueValues(self):
-        pressureHistory = util.PressureHistory()
-        pressureHistory.add(1028)
-        pressureHistory.add(1033)
-        hueList = pressureHistory.asHatHueList()
+        self.pressureHistory.add(util.pressureMax)
+        self.pressureHistory.add(util.pressureMin)
+        hueList = self.pressureHistory.asHatHueList()
         self.assertEqual(hueList[0:3], [None, 0.75, 0])
 
     def test_pressureHistoryAsRGBList(self):
-        pressureHistory = util.PressureHistory()
-        pressureHistory.add(1028)
-        pressureHistory.add(1033)
-        self.assertEqual(pressureHistory.asHatRGBList()[1:3],[[127,0,255],[255,0,0]])
+        self.pressureHistory.add(util.pressureMax)
+        self.pressureHistory.add(util.pressureMin)
+        self.assertEqual(self.pressureHistory.asHatRGBList()[1:3],[[127,0,255],[255,0,0]])
 
 if __name__ == '__main__':
     unittest.main()
