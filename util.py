@@ -5,23 +5,22 @@ class PressureHistory:
 	MAXLEN=63
 
 	def __init__(self):
-		self.history=[None]*PressureHistory.MAXLEN
+		self.history=(None,)*PressureHistory.MAXLEN
 
 	def add(self, newPressure):
-		self.history.pop()
-		self.history.insert(0, newPressure)
+		self.history = (newPressure,)+self.history[0:(len(self.history)-1)]
 
 	def asHatList(self):
-		return [None]+self.history
+		return (None,)+self.history
 
 	def asHatHueList(self):
-		return [pressureToHue(p) for p in self.asHatList()]
+		return tuple(pressureToHue(p) for p in self.asHatList())
 
 	def asHatRGBList(self):
-		rgbList=[list(colorsys.hsv_to_rgb(h,1,1) if h!=None else [0,0,0]) for h in self.asHatHueList()]
+		rgbList=tuple(list(colorsys.hsv_to_rgb(h,1,1) if h!=None else [0,0,0]) for h in self.asHatHueList())
 		def to255Range(x):
-			return [int(xx*255) for xx in x]
-		return [to255Range(c) for c in rgbList]
+			return tuple(int(xx*255) for xx in x)
+		return tuple(to255Range(c) for c in rgbList)
 
 pressureMin = 1020
 pressureMax = 1030

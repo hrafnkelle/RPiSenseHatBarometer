@@ -49,12 +49,12 @@ class TestPressureHistory(unittest.TestCase):
         self.pressureHistory.add(util.pressureMax)
         self.pressureHistory.add(util.pressureMin)
         hueList = self.pressureHistory.asHatHueList()
-        self.assertEqual(hueList[0:3], [None, 0.75, 0])
+        self.assertEqual(hueList[0:3], (None, 0.75, 0))
 
     def test_pressureHistoryAsRGBList(self):
         self.pressureHistory.add(util.pressureMax)
         self.pressureHistory.add(util.pressureMin)
-        self.assertEqual(self.pressureHistory.asHatRGBList()[1:3],[[127,0,255],[255,0,0]])
+        self.assertEqual(self.pressureHistory.asHatRGBList()[1:3],((127,0,255),(255,0,0)))
 
 if __name__ == '__main__':
     unittest.main()
