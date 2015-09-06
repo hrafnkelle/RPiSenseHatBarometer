@@ -11,9 +11,9 @@ The pressure is measured 10x second and averaged over 4 minutes. Then the averag
 displayed on the LED matrix. The previously displayed pressure values are shifted one position. This way the pressure
 variations are displayed over time.
 
-The barometer starts by using the current pressure and a small interval around it to map pressure to the red to green
+The barometer starts by using the current pressure and a small interval around it to map pressure to the red to blue
 color interval. As time goes it picks up the maximum and minimum pressure and readjusts. This way you will see
-interesting patterns immediately but the converge to a range representive of your environment.
+interesting patterns immediately but the converge to a range representative of your environment.
 
 Information on the sense hat: https://www.raspberrypi.org/blog/the-sense-hat-headgear-for-the-terminally-curious/
 
@@ -27,7 +27,7 @@ Run the barometer with
 sudo python3 barometerRun.py
 ```
 
-If you want to leave it running without having an open terminal concider using tmux or screen
+If you want to leave it running without having an open terminal consider using tmux or screen
 
 Development
 -----------
