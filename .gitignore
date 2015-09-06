@@ -1,0 +1,4 @@
+__pycache__
+.remote-sync.json
+*.csv
+venv
