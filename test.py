@@ -4,6 +4,13 @@ import mock
 from PressureHistory import PressureHistory, LEDMatrixAdapter
 from Barometer import Barometer
 
+class TestPressureHistoryInit(unittest.TestCase):
+    def test_initReadsFromKwargs(self):
+        settings = {'initialpressurelow': 950, 'initialpressurehigh':1020}
+        pressureHistory = PressureHistory(**settings)
+        self.assertEqual(pressureHistory.min, settings['initialpressurelow'])
+        self.assertEqual(pressureHistory.max, settings['initialpressurehigh'])
+
 class TestPressureHistory(unittest.TestCase):
     def setUp(self):
         self.pressureHistory = PressureHistory()
@@ -170,6 +177,30 @@ class TestBarometer(unittest.TestCase):
 
     def test_clearsMatrixOnStartup(self):
         self.mock_senseHat.clear.assert_called_with()
+
+class TestBarometerInit(unittest.TestCase):
+    def test_readsUpdateRateFromKeyValueInitArgs(self):
+        mock_senseHat = mock.Mock()
+        mock_pressureHistory = mock.create_autospec(PressureHistory)
+
+        settings = {'updaterate': 10}
+        barometer = Barometer(mock_senseHat, mock_pressureHistory, **settings)
+        self.assertEqual(barometer.updateInterval, settings['updaterate']*Barometer.TICKS_PER_SECOND)
+
+    def test_usesDefaultUpdateIntervaIfNotProvided(self):
+        mock_senseHat = mock.Mock()
+        mock_pressureHistory = mock.create_autospec(PressureHistory)
+
+        barometer = Barometer(mock_senseHat, mock_pressureHistory)
+        self.assertEqual(barometer.updateInterval, Barometer.DEFAULT_UPDATE_INTERVAL)
+
+    def test_usesDefaultUpdateIntervaIfNoneProvided(self):
+        mock_senseHat = mock.Mock()
+        mock_pressureHistory = mock.create_autospec(PressureHistory, updaterate=None)
+
+        barometer = Barometer(mock_senseHat, mock_pressureHistory)
+        self.assertEqual(barometer.updateInterval, Barometer.DEFAULT_UPDATE_INTERVAL)
+
 
 if __name__ == '__main__':
     unittest.main()

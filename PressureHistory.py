@@ -4,11 +4,11 @@ from functools import reduce
 class PressureHistory:
 	MAXLEN=63
 
-	def __init__(self):
+	def __init__(self, **kwargs):
 		self.history=(None,)*PressureHistory.MAXLEN
 		self.pressureAccumulator = ()
-		self.pmin=None
-		self.pmax=None
+		self.pmin=kwargs['initialpressurelow'] if 'initialpressurelow' in kwargs else None
+		self.pmax=kwargs['initialpressurehigh'] if 'initialpressurehigh' in kwargs else None
 
 	def add(self, newPressure):
 		if self.max==None or newPressure>self.max:

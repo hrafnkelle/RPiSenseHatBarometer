@@ -6,13 +6,13 @@ class Barometer:
     CORNERPIXEL = (0,0)
     DEFAULT_UPDATE_INTERVAL = TICKS_PER_SECOND*60*4
 
-    def __init__(self, senseHat, pressureHistory, updateInterval=None):
+    def __init__(self, senseHat, pressureHistory, **kwargs):
        self.sense = senseHat
        self.pressureHistory = pressureHistory
        self.ledAdapter = LEDMatrixAdapter(pressureHistory)
        self.sense.clear()
        self.ticks = 0
-       self.updateInterval = Barometer.DEFAULT_UPDATE_INTERVAL if updateInterval==None else updateInterval
+       self.updateInterval = kwargs['updaterate']*Barometer.TICKS_PER_SECOND if ('updaterate' in kwargs) and (kwargs['updaterate']!=None) else Barometer.DEFAULT_UPDATE_INTERVAL
 
     def updateDisplay(self):
         self.sense.set_pixels(self.ledAdapter.asHatRGBList())

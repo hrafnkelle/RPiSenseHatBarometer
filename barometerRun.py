@@ -1,14 +1,21 @@
 import sense_hat
 from Barometer import Barometer
 from PressureHistory import PressureHistory
+import argparse
+
+def parseCmdline():
+	parser = argparse.ArgumentParser(description='Visualize ambient pressure variations by color coding the pressure on the RPi Sense Hat')
+	parser.add_argument('--initiallow',dest='initiallow',help='Pressure mapped to red color until a lower pressure is observed',type=float)
+	parser.add_argument('--initialhigh',dest='initialhigh',help='Pressure mapped to blue color until a higher pressure is observed',type=float)
+	parser.add_argument('--updaterate',dest='updaterate',help='Update rate in seconds',type=int)
+
+	return parser.parse_args()
 
 def main():
-	pressureHistory = PressureHistory()
-	barometer = Barometer(sense_hat.SenseHat(), pressureHistory)
+	args = parseCmdline()
 
-	initialPressureDelta = 0.01
-	pressureHistory.max = barometer.sense.pressure+initialPressureDelta
-	pressureHistory.min = pressureHistory.max-2*initialPressureDelta
+	pressureHistory = PressureHistory(initialpressurelow=args.initiallow, initialpressurehigh=args.initialhigh)
+	barometer = Barometer(sense_hat.SenseHat(), pressureHistory, updaterate=args.updaterate)
 
 	barometer.run()
 
