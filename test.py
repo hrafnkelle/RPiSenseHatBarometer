@@ -11,6 +11,14 @@ class TestPressureHistoryInit(unittest.TestCase):
         self.assertEqual(pressureHistory.min, settings['initialpressurelow'])
         self.assertEqual(pressureHistory.max, settings['initialpressurehigh'])
 
+    def test_initialLimitsOverridesHistoryExtremesIfHistoryBoundedByInitialLimits(self):
+        settings = {'initialpressurelow': 950, 'initialpressurehigh':1020}
+        pressureHistory = PressureHistory(**settings)
+        pressureHistory.add(951)
+        pressureHistory.add(1019)
+        self.assertEqual(pressureHistory.min, settings['initialpressurelow'])
+        self.assertEqual(pressureHistory.max, settings['initialpressurehigh'])
+
 class TestPressureHistory(unittest.TestCase):
     def setUp(self):
         self.pressureHistory = PressureHistory()
@@ -38,7 +46,8 @@ class TestPressureHistory(unittest.TestCase):
         self.pressureHistory.add(somePressure)
         self.pressureHistory.includeInAverage(otherPressure)
         self.pressureHistory.addFromAccumulator()
-        self.assertEqual(self.pressureHistory.history[0:2],(otherPressure,somePressure))
+        self.assertEqual(self.pressureHistory.history[0],otherPressure)
+        self.assertEqual(self.pressureHistory.history[1],somePressure)
 
     def test_latestValueAddedCanBeQueriedFor(self):
         somePressure=1021
@@ -47,7 +56,7 @@ class TestPressureHistory(unittest.TestCase):
 
     def test_addDoesnModifyLength(self):
         self.pressureHistory.add(1)
-        self.assertEqual(len(self.pressureHistory.history), PressureHistory.MAXLEN)
+        self.assertEqual(self.pressureHistory.history.maxlen, PressureHistory.MAXLEN)
 
     def test_addValueIsTheLatestValue(self):
         newPressure = 7
@@ -71,7 +80,7 @@ class TestPressureHistory(unittest.TestCase):
         for n in range(maxPressure+1):
             self.pressureHistory.add(n)
 
-        self.assertEqual(self.pressureHistory.min, 0)
+        self.assertEqual(self.pressureHistory.min, maxPressure-self.pressureHistory.history.maxlen+1)
 
     def test_pressureIsNormalizedToExtremes(self):
         minPressure = 1025
@@ -79,17 +88,17 @@ class TestPressureHistory(unittest.TestCase):
         self.pressureHistory.add(minPressure)
         self.pressureHistory.add(maxPressure)
         self.pressureHistory.add((minPressure+maxPressure)/2)
-        self.assertEqual(self.pressureHistory.normalized()[0:3],(0.5,1,0))
+        self.assertEqual(self.pressureHistory.normalized()[0:3],[0.5,1,0])
 
     def test_normalizedPressureIsFullLengthWithNoneIfNoValueAdded(self):
-        self.assertEqual(self.pressureHistory.normalized(), (None,)*self.pressureHistory.MAXLEN)
+        self.assertEqual(self.pressureHistory.normalized(), [None]*self.pressureHistory.MAXLEN)
 
     def test_normalizedPressureHistoryHasExtremesAndNoneIfFewAdded(self):
         minPressure = 1025
         maxPressure = 1030
         self.pressureHistory.add(minPressure)
         self.pressureHistory.add(maxPressure)
-        self.assertEqual(self.pressureHistory.normalized(),(1,0)+(None,)*(self.pressureHistory.MAXLEN-2))
+        self.assertEqual(self.pressureHistory.normalized(),[1,0]+[None]*(self.pressureHistory.MAXLEN-2))
 
     def test_normalizeOneValueClamps(self):
         minPressure = 1025
@@ -200,6 +209,7 @@ class TestBarometerInit(unittest.TestCase):
 
         barometer = Barometer(mock_senseHat, mock_pressureHistory)
         self.assertEqual(barometer.updateInterval, Barometer.DEFAULT_UPDATE_INTERVAL)
+
 
 
 if __name__ == '__main__':

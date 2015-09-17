@@ -14,7 +14,12 @@ def parseCmdline():
 def main():
 	args = parseCmdline()
 
-	pressureHistory = PressureHistory(initialpressurelow=args.initiallow, initialpressurehigh=args.initialhigh)
+	pressureHistorySettings = {}
+	if args.initiallow:
+		pressureHistorySettings['initialpressurelow'] = args.initiallow
+	if args.initialhigh:
+		pressureHistorySettings['initialpressurehigh'] = args.initialhigh
+	pressureHistory = PressureHistory(**pressureHistorySettings)
 	barometer = Barometer(sense_hat.SenseHat(), pressureHistory, updaterate=args.updaterate)
 
 	barometer.run()

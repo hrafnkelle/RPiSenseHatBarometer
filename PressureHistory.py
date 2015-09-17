@@ -1,22 +1,18 @@
 import colorsys
+import collections
 from functools import reduce
 
 class PressureHistory:
 	MAXLEN=63
 
 	def __init__(self, **kwargs):
-		self.history=(None,)*PressureHistory.MAXLEN
+		self.history = collections.deque(maxlen=PressureHistory.MAXLEN)
 		self.pressureAccumulator = ()
-		self.pmin=kwargs['initialpressurelow'] if 'initialpressurelow' in kwargs else None
-		self.pmax=kwargs['initialpressurehigh'] if 'initialpressurehigh' in kwargs else None
+		self.initialPressureLow=kwargs['initialpressurelow'] if 'initialpressurelow' in kwargs else float('Inf')
+		self.initialPressureHigh=kwargs['initialpressurehigh'] if 'initialpressurehigh' in kwargs else float('-Inf')
 
 	def add(self, newPressure):
-		if self.max==None or newPressure>self.max:
-			self.max = newPressure
-		if self.min==None or newPressure<self.min:
-			self.min= newPressure
-
-		self.history = (newPressure,)+self.history[0:(len(self.history)-1)]
+		self.history.appendleft(newPressure)
 
 	def addFromIterator(self, iter):
 		for p in iter:
@@ -24,27 +20,23 @@ class PressureHistory:
 
 	@property
 	def max(self):
-		return self.pmax
-	@max.setter
-	def max(self,value):
-		self.pmax = value
+		historyMax = max(self.history) if len(self.history)>0 else self.initialPressureHigh
+		return max(historyMax, self.initialPressureHigh)
 	@property
 	def min(self):
-		return self.pmin
-	@min.setter
-	def min(self,value):
-		self.pmin = value
+		historyMin = min(self.history) if len(self.history)>0 else self.initialPressureLow
+		return min(historyMin, self.initialPressureLow)
 
 	def normalizeOneValue(self, pressure):
 		if pressure==None:
 			return None
-		if self.max==self.min or self.max==None or self.min==None:
+		if len(self.history)<=1 or self.max==self.min: #self.max==None or self.min==None:
 			return 0.5
 		normalizedValue = (pressure-self.min)/(self.max-self.min)
 		return min(1,max(0,normalizedValue))
 
 	def normalized(self):
-		return tuple(self.normalizeOneValue(p) for p in self.history)
+		return [self.normalizeOneValue(p) for p in self.history]+[None]*(self.history.maxlen-len(self.history))
 
 	def averageOfAccumulated(self):
 		if len(self.pressureAccumulator):
