@@ -80,7 +80,7 @@ class TestPressureHistory(unittest.TestCase):
         for n in range(maxPressure+1):
             self.pressureHistory.add(n)
 
-        self.assertEqual(self.pressureHistory.min, maxPressure-self.pressureHistory.history.maxlen+1)
+        self.assertEqual(self.pressureHistory.min, 0)
 
     def test_pressureIsNormalizedToExtremes(self):
         minPressure = 1025

@@ -1,6 +1,5 @@
 import colorsys
 import collections
-from functools import reduce
 
 class PressureHistory:
 	MAXLEN=63
@@ -8,11 +7,13 @@ class PressureHistory:
 	def __init__(self, **kwargs):
 		self.history = collections.deque(maxlen=PressureHistory.MAXLEN)
 		self.pressureAccumulator = ()
-		self.initialPressureLow=kwargs['initialpressurelow'] if 'initialpressurelow' in kwargs else float('Inf')
-		self.initialPressureHigh=kwargs['initialpressurehigh'] if 'initialpressurehigh' in kwargs else float('-Inf')
+		self.lowestObservedPressure=kwargs['initialpressurelow'] if 'initialpressurelow' in kwargs else float('Inf')
+		self.highestObservedPressure=kwargs['initialpressurehigh'] if 'initialpressurehigh' in kwargs else float('-Inf')
 
 	def add(self, newPressure):
 		self.history.appendleft(newPressure)
+		self.lowestObservedPressure = min(self.lowestObservedPressure,newPressure)
+		self.highestObservedPressure = max(self.highestObservedPressure,newPressure)
 
 	def addFromIterator(self, iter):
 		for p in iter:
@@ -20,12 +21,10 @@ class PressureHistory:
 
 	@property
 	def max(self):
-		historyMax = max(self.history) if len(self.history)>0 else self.initialPressureHigh
-		return max(historyMax, self.initialPressureHigh)
+		return self.highestObservedPressure
 	@property
 	def min(self):
-		historyMin = min(self.history) if len(self.history)>0 else self.initialPressureLow
-		return min(historyMin, self.initialPressureLow)
+		return self.lowestObservedPressure
 
 	def normalizeOneValue(self, pressure):
 		if pressure==None:
