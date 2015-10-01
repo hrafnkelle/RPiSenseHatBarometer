@@ -15,16 +15,41 @@ The barometer starts by using the current pressure and a small interval around i
 color interval. As time goes it picks up the maximum and minimum pressure and readjusts. This way you will see
 interesting patterns immediately but the converge to a range representative of your environment.
 
+Values can be logged to a CSV file and the initial HIGH/LOW range can be set through the command line.
+
+
 Information on the sense hat: https://www.raspberrypi.org/blog/the-sense-hat-headgear-for-the-terminally-curious/
 
 Installation
 ------------
 
-Clone this repository on your Raspberry Pi.
+Clone this repository on your Raspberry Pi. I'm running the Debian Jessie distribution with python3.4
 
 Run the barometer with
 ```bash
-sudo python3 barometerRun.py
+python3 barometerRun.py --help
+```
+to see the configuration options.
+```
+usage: barometerRun.py [-h] [--initiallow INITIALLOW]
+                       [--initialhigh INITIALHIGH] [--updaterate UPDATERATE]
+                       [--log LOGFILENAME]
+
+Visualize ambient pressure variations by color coding the pressure on the RPi
+Sense Hat
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --initiallow INITIALLOW
+                        Pressure mapped to red color until a lower pressure is
+                        observed
+  --initialhigh INITIALHIGH
+                        Pressure mapped to blue color until a higher pressure
+                        is observed
+  --updaterate UPDATERATE
+                        Update rate in seconds
+  --log LOGFILENAME     Name of CSV file for logging pressure
+
 ```
 
 If you want to leave it running without having an open terminal consider using tmux or screen
