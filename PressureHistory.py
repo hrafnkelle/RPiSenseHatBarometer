@@ -1,4 +1,6 @@
+import csv
 import colorsys
+import datetime
 import collections
 
 class PressureHistory:
@@ -10,10 +12,16 @@ class PressureHistory:
 		self.lowestObservedPressure=kwargs['initialpressurelow'] if 'initialpressurelow' in kwargs else float('Inf')
 		self.highestObservedPressure=kwargs['initialpressurehigh'] if 'initialpressurehigh' in kwargs else float('-Inf')
 
+		if 'logger' in kwargs:
+			self.logger = kwargs['logger']
+		else:
+			self.logger = NoLogger()
+
 	def add(self, newPressure):
 		self.history.appendleft(newPressure)
 		self.lowestObservedPressure = min(self.lowestObservedPressure,newPressure)
 		self.highestObservedPressure = max(self.highestObservedPressure,newPressure)
+		self.logger.log(newPressure)
 
 	def addFromIterator(self, iter):
 		for p in iter:
@@ -75,3 +83,20 @@ class LEDMatrixAdapter:
 	def asHatRGBList(self):
 		rgbList=tuple(list(colorsys.hsv_to_rgb(h,1,1) if h!=None else [0,0,0]) for h in (None,)+self.asHueList())
 		return tuple(LEDMatrixAdapter.to255Range(c) for c in rgbList)
+
+class Logger:
+	def log(self, value):
+		pass
+
+class NoLogger(Logger):
+	pass
+
+class CSVLogger:
+	def __init__(self, csvfile=None):
+		self.writer = csv.writer(csvfile)
+		pass
+
+	def log(self, value):
+		nowStr = datetime.datetime.strftime(datetime.datetime.now(),"%Y-%m-%d %H:%M:%S")
+		self.writer.writerow([nowStr, value])
+		pass

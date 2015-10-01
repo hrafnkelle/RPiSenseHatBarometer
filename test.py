@@ -1,8 +1,9 @@
 import unittest
-import mock
+from unittest import mock
 
-from PressureHistory import PressureHistory, LEDMatrixAdapter
+from PressureHistory import PressureHistory, LEDMatrixAdapter, CSVLogger, NoLogger
 from Barometer import Barometer
+import datetime
 
 class TestPressureHistoryInit(unittest.TestCase):
     def test_initReadsFromKwargs(self):
@@ -18,6 +19,12 @@ class TestPressureHistoryInit(unittest.TestCase):
         pressureHistory.add(1019)
         self.assertEqual(pressureHistory.min, settings['initialpressurelow'])
         self.assertEqual(pressureHistory.max, settings['initialpressurehigh'])
+
+    def test_InitializingWithoutALoggerSetsLoggerToNoLogger(self):
+        pressureHistory = PressureHistory()
+        self.assertTrue(type(pressureHistory.logger) is NoLogger)
+
+
 
 class TestPressureHistory(unittest.TestCase):
     def setUp(self):
@@ -126,6 +133,25 @@ class TestPressureHistory(unittest.TestCase):
         self.assertEqual(self.pressureHistory.max, 4)
         self.assertEqual(self.pressureHistory.min, 1)
 
+class TestPressureHistoryWithLogger(unittest.TestCase):
+    def test_addCallsLogger(self):
+        mock_logger = mock.create_autospec(CSVLogger)
+        ph = PressureHistory(logger=mock_logger)
+        somePressure = 1000
+        ph.add(somePressure)
+
+        mock_logger.log.assert_called_once_with(somePressure)
+
+    def test_addFromIterCallsLogForEachValue(self):
+        mock_logger = mock.create_autospec(CSVLogger)
+        ph = PressureHistory(logger=mock_logger)
+        pressureList = [1,2]
+        ph.addFromIterator(pressureList)
+
+        for pressure in pressureList:
+            mock_logger.log.assert_any_call(pressure)
+
+
 class TestLEDMatrixAdapter(unittest.TestCase):
 
     def test_hueListretrievesNormalizedHistory(self):
@@ -210,6 +236,21 @@ class TestBarometerInit(unittest.TestCase):
         barometer = Barometer(mock_senseHat, mock_pressureHistory)
         self.assertEqual(barometer.updateInterval, Barometer.DEFAULT_UPDATE_INTERVAL)
 
+class TestCSVLogger(unittest.TestCase):
+
+    @mock.patch('csv.writer')
+    def test_log(self, mockWriter):
+        l = CSVLogger(csvfile=mock.Mock())
+        someValue = 1000
+        someDateStr = "1975-11-23 10:11:12"
+#        mockDatetime.strftime.configure_mock(return_value=someDateStr)
+        with mock.patch('datetime.datetime') as mock_date:
+            mock_date.now.return_value = datetime.datetime(1975, 11, 23,10,11,12,0)
+            mock_date.strftime.return_value = someDateStr
+            mock_date.side_effect = lambda *args, **kw: datetime(*args, **kw)
+            l.log(someValue)
+            mock_date.now.assert_called_with()
+            l.writer.writerow.assert_called_once_with([someDateStr, someValue])
 
 
 if __name__ == '__main__':
